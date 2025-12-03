@@ -1,6 +1,7 @@
+import { DeleteResult } from 'typeorm';
 import { Postagem } from '../entities/model.entities';
 import { PostagemService } from './../services/postagem.service';
-import { Controller, Get, HttpCode, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
 
 @Controller("/postagens") // Indica que Classe é uma Controller
 export class PostagemController {
@@ -13,5 +14,45 @@ findAll(): Promise<Postagem[]> {
     return this.postagemService.findAll(); // Chama o método findAll do serviço de postagem
 }
 
+// @Get("/:id_post") Indica que esse método lida com Requisições do Tipo GET e que no seu endpoint será enviado um id como parametro
+// @Param captura o paramêtro envia pelo endpoint e o atribui ao parametro do método findById(id:number)
+// ParseIntPipe converte o parametro do endpoint de string para int. Ex: id: '1' => id: 1
+
+@Get("/:id")
+@HttpCode(HttpStatus.OK) // Define o código de status HTTP para 200 OK  
+findById(@Param('id', ParseIntPipe) id: number): Promise<Postagem> {
+    return this.postagemService.findById(id); // Chama o método findAll do serviço de postagem
 }
 
+@Get('/titulo/:titulo') // postagens/titulo/{texto}
+    @HttpCode(HttpStatus.OK)
+    findByTitulo(@Param('titulo') titulo: string): Promise<Postagem[]> {
+        return this.postagemService.findByTitulo(titulo);
+    }
+
+    // @Post() Indica que esse método lida com Requisições do Tipo Post
+    // @Body() Captura/Extrai o objeto que vem pelo Corpo da Requisição e passa para parametro do método 
+    @Post() // Usado quando queremos Cadastrar/Criar/Salva alguma informação
+    @HttpCode(HttpStatus.CREATED)   // Monta a Resposa HTTP para o Cliente com o status 201
+    create(@Body() postagem: Postagem): Promise<Postagem> {
+        return this.postagemService.create(postagem);
+    }
+
+    // @Put() Indica que esse método lida com Requisições do Tipo Put
+    // @Body() Captura/Extrai o objeto que vem pelo Corpo da Requisição e passa para parametro do método 
+    @Put()// Usado quando queremos Atualizar alguma informação
+    @HttpCode(HttpStatus.OK) // Monta a Resposa HTTP para o Cliente com o status 200    
+    update(@Body() postagem: Postagem): Promise<Postagem> {
+        return this.postagemService.update(postagem);
+    }
+
+    // @Delete('/:ID') Indica que esse método lida com Requisições do Tipo DELETE e que no seu endpoint será enviado um id como parametro
+    // @Param captura o paramêtro envia pelo endpoint e o atribui ao parametro do método delete(id:number)
+    // ParseIntPipe converte o parametro do endpoint de string para int. Ex: id: '1' => id: 1
+    @Delete('/:id')
+    @HttpCode(HttpStatus.NO_CONTENT) // Monta a Resposa HTTP para o Cliente com o status 204
+    delete(@Param('id', ParseIntPipe) id: number): Promise<DeleteResult>{
+        return this.postagemService.delete(id);
+    }
+
+}
