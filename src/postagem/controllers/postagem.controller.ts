@@ -1,5 +1,5 @@
 import { DeleteResult } from 'typeorm';
-import { Postagem } from '../entities/model.entities';
+import { Postagem } from '../entities/postagem.entity';
 import { PostagemService } from './../services/postagem.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
 
