@@ -9,7 +9,7 @@ export class UsuarioService {
     constructor(
         @InjectRepository(Usuario)
         private usuarioRepository: Repository<Usuario>,
-        private bcrypt: Bcrypt
+        private bcrypt: Bcrypt  // Dentro do Construtor injetamos o arquivo BCRYPT para podermos usar seus métodos
     ) { }
 
     async findByUsuario(usuario: string): Promise<Usuario | null> {
@@ -22,48 +22,45 @@ export class UsuarioService {
 
     async findAll(): Promise<Usuario[]> {
         return await this.usuarioRepository.find();
-
     }
 
     async findById(id: number): Promise<Usuario> {
-
-        const usuario = await this.usuarioRepository.findOne({
-            where: {
-                id
-            }
+        let usuario = await this.usuarioRepository.findOne({
+            where: { id }
         });
 
         if (!usuario)
-            throw new HttpException('Usuario não encontrado!', HttpStatus.NOT_FOUND);
+            throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
 
         return usuario;
-
     }
 
     async create(usuario: Usuario): Promise<Usuario> {
-        
-        const buscaUsuario = await this.findByUsuario(usuario.usuario);
+        let usuarioBusca = await this.findByUsuario(usuario.usuario);
 
-        if (buscaUsuario)
-            throw new HttpException("O Usuario já existe!", HttpStatus.BAD_REQUEST);
+        if (!usuarioBusca) {
+            // Antes de cadastrar o usuario chamamos a função de Criptografia construída no arquivo bcrypt
+            usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha)
 
-        usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha)
-        return await this.usuarioRepository.save(usuario);
+            return await this.usuarioRepository.save(usuario);
+        }
+
+        throw new HttpException("O Usuário ja existe!", HttpStatus.BAD_REQUEST);
 
     }
 
     async update(usuario: Usuario): Promise<Usuario> {
+        let usuarioUpdate: Usuario = await this.findById(usuario.id) // Função para localizar o usuario pelo ID
+        let usuarioBusca = await this.findByUsuario(usuario.usuario) // Função para localizar o usuario pelo email
 
-        await this.findById(usuario.id);
+        if (!usuarioUpdate)
+            throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
 
-        const buscaUsuario = await this.findByUsuario(usuario.usuario);
+        if (usuarioBusca && usuarioBusca.id !== usuario.id)
+            throw new HttpException('Usuário (e-mail) já Cadastrado, digite outro!', HttpStatus.BAD_REQUEST);
 
-        if (buscaUsuario && buscaUsuario.id !== usuario.id)
-            throw new HttpException('Usuário (e-mail) já Cadastrado!', HttpStatus.BAD_REQUEST);
-
+        // Antes de atualizar o usuario chamamos a função de Criptografia construída no arquivo bcrypt
         usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha)
         return await this.usuarioRepository.save(usuario);
-
     }
-
 }
