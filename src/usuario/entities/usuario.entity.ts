@@ -33,7 +33,7 @@ export class Usuario {
 
     // Indica o lado UM do relacionamento, indicando que esse campo se conecta ao campo Usuario da Model Postagem
     @OneToMany(() => Postagem, (postagem) => postagem.usuario)
-    @ApiProperty()
+    @ApiProperty({ type: () => Usuario })
     postagem: Postagem[]
 
 }

@@ -18,7 +18,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) { // Classe que de
         const user = await this.authService.validateUser(username, password) // Pedimos que a validação seja feita
 
         if (!user) {    // Se a validação não passou, lance uma exceção
-            throw new UnauthorizedException()
+            throw new UnauthorizedException('Usuário e/ou senha incorretos!')
         }
 
         return user

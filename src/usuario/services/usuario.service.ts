@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario } from '../entities/usuario.entity';
 import { Bcrypt } from '../../auth/bcrypt/bcrypt';
+import { DeleteResult } from 'typeorm/browser';
 
 @Injectable()
 export class UsuarioService {
@@ -62,5 +63,13 @@ export class UsuarioService {
         // Antes de atualizar o usuario chamamos a função de Criptografia construída no arquivo bcrypt
         usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha)
         return await this.usuarioRepository.save(usuario);
+    }
+
+    async delete(id: number): Promise<DeleteResult> {
+        const buscarUsuario = await this.findById(id);
+        if (!buscarUsuario)
+            throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
+
+        return await this.usuarioRepository.delete(id);
     }
 }

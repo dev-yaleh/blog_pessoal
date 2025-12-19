@@ -17,7 +17,7 @@ export class Tema {
 
     // Indica o lado UM do relacionamento, indicando que esse campo se conecta ao campo Usuario da Model Postagem
     @OneToMany(() => Postagem, (postagem) => postagem.tema)
-    @ApiProperty()
+    @ApiProperty({ type: () => Tema })
     postagem: Postagem[]
 
 }
